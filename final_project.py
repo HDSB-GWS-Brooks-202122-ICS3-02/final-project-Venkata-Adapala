@@ -10,8 +10,9 @@ def main():
     surfaceHeight = 780
     
     gameState = "start"
-    
-    clock = pygame.time.Clock()  #fps
+
+    #fps
+    clock = pygame.time.Clock() 
 
     mainSurface = pygame.display.set_mode((surfaceWidth,surfaceHeight))
 
@@ -29,6 +30,7 @@ def main():
     rectPlayD = [125,550,200,55]
     #rect1D = [210,40,35,12]
     rectColor = "black"
+    #rectSpeed = 0.8
     jumping = False
     aboveScreen = False
     
@@ -37,20 +39,22 @@ def main():
     moveCircleRight = False 
     moveCircleLeft = False
 
-    #Randomising rectangle placement
-    rects = []
-    for i in range(10):
-        rects.append([random.randrange(surfaceWidth - 35),random.randrange(groundLevel - 55),35,12])
 
-    #rects2 = []
+    #Randomising rectangle placement
+    rectNormal = []
+    for i in range(7):
+        rectNormal.append([random.randrange(surfaceWidth - 35),random.randrange(groundLevel - 55),35,12])
+
+    rectMove = []
     #if aboveScreen:
-        #for i in range(10):
-            #rects2.append([random.randrange(surfaceWidth - 35),random.randrange(groundLevel - 55),35,12])
-            
+    for i in range(3):
+        rectMove.append([random.randrange(surfaceWidth - 35),random.randrange(groundLevel - 55),35,12,0.8])
+
+
     #Creating a method for rectangle collision detection and bouncing
     def bounce(circleCoords,rectCoords,cSize,circleSpeedY):
-        if rects[i][0] < circleCoords[0] < (rects[i][0] + rects[i][2])\
-           and rects[i][1] < (circleCoords[1] + cSize) < (rects[i][1] + rects[i][3] + 10) and circleSpeedY > 0:
+        if rectNormal[i][0] < circleCoords[0] < (rectNormal[i][0] + rectNormal[i][2])\
+           and rectNormal[i][1] < (circleCoords[1] + cSize) < (rectNormal[i][1] + rectNormal[i][3] + 10) and circleSpeedY > 0:
             print("Hit")
             return -21
         else:
@@ -77,9 +81,21 @@ def main():
                    and rectPlayD[1] < pygame.mouse.get_pos()[1] < (rectPlayD[1] + rectPlayD[3]):
                     gameState = "game"
 
-    
+
         #Game screen
         if gameState == "game":
+
+            mainSurface.fill("dodgerblue")
+
+            #Drawing the circles and rectangles
+            pygame.draw.rect(mainSurface, "black", (0,groundLevel,surfaceWidth,surfaceHeight-groundLevel))
+            pygame.draw.circle(mainSurface, circleColor, (circlePos[0],circlePos[1]),circleSize)
+        
+            for i in range(len(rectNormal)):
+                pygame.draw.rect(mainSurface, rectColor, (rectNormal[i][0], rectNormal[i][1], rectNormal[i][2], rectNormal[i][3]))
+            for i in range(len(rectMove)):
+                pygame.draw.rect(mainSurface, rectColor, (rectMove[i][0], rectMove[i][1], rectMove[i][2], rectMove[i][3]))
+            
             if ev.type == pygame.KEYDOWN:
                 if ev.key == pygame.K_RIGHT:
                     moveCircleRight = True
@@ -108,38 +124,34 @@ def main():
         
             if ev.type == pygame.MOUSEBUTTONDOWN:
                 if jumping == False:
-                    circleSpeedY = -21 
+                    circleSpeedY = -21
                     jumping = True
                 
-            for i in range(len(rects)):    
-                circleSpeedY = bounce(circlePos,rects[i],circleSize,circleSpeedY)
-            circlePos[1] += circleSpeedY         
-            
-            if circleSpeedY < 0:
-                for i in range(len(rects)):
-                    rects[i][1] += 0.75                  
+            for i in range(len(rectNormal)):    
+                circleSpeedY = bounce(circlePos,rectNormal[i],circleSize,circleSpeedY)
+            circlePos[1] += circleSpeedY
 
             if circlePos[0] > surfaceWidth:
                 circlePos[0] = 0
             elif circlePos[0] < 0:
                 circlePos[0] = surfaceWidth
 
+        #Moving the rectangles
+            if circleSpeedY < 0:
+                for i in range(len(rectNormal)):
+                    rectNormal[i][1] += 0.7
+                for i in range(len(rectMove)):
+                    rectMove[i][1] += 0.7
+
+            for i in range(len(rectMove)):
+                rectMove[i][0] += rectMove[i][4]
+                if (rectMove[i][0] + rectMove[i][2]) >= surfaceWidth or rectMove[i][0] < 0:
+                    rectMove[i][4] = -rectMove[i][4]
+
             #if circlePos[1] <= 0:
                 #aboveScreen = True
             #elif circlePos[1] > 0:
                 #aboveScreen = False
-
-
-            mainSurface.fill("dodgerblue")
-
-            #Drawing the circles and rectangles
-            pygame.draw.rect(mainSurface, "black", (0,groundLevel,surfaceWidth,surfaceHeight-groundLevel))
-            pygame.draw.circle(mainSurface, circleColor, (circlePos[0],circlePos[1]),circleSize)
-        
-            for i in range(len(rects)):
-                pygame.draw.rect(mainSurface, rectColor, (rects[i][0], rects[i][1], rects[i][2], rects[i][3]))
-            #for i in range(len(rects2)):
-                #pygame.draw.rect(mainSurface, rectColor, (rects2[i][0], rects2[i][1], rects2[i][2], rects2[i][3]))
 
         pygame.display.flip()
         

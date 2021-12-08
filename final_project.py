@@ -31,8 +31,8 @@ def main():
     circleFall = False
     
     rectPRD = [125,575,200,55]
+    rectAgain = 0
     jumping = False
-    noOfBounces = 0
     
     groundLevel = surfaceHeight - 25
     
@@ -42,32 +42,12 @@ def main():
 
     #Randomising rectangle placement
     rectNormal = []
-    for i in range(2):
+    for i in range(6):
         rectNormal.append([random.randrange(surfaceWidth - 35),random.randrange(groundLevel - 55),35,12])
 
     rectMove = []
-    for i in range(2):
+    for i in range(6):
         rectMove.append([random.randrange(surfaceWidth - 35),random.randrange(groundLevel - 55),35,12,0.8])
-        
-    rectTramp = []
-    for i in range(2):
-        rectTramp.append([random.randrange(surfaceWidth - 35),random.randrange(groundLevel - 55),35,12])
-        
-    rectSpike = []
-    for i in range(2):
-        rectSpike.append([random.randrange(surfaceWidth - 35),random.randrange(groundLevel - 55),35,12])
-        
-    rectMoveSpike = []
-    for i in range(2):
-        rectMoveSpike.append([random.randrange(surfaceWidth - 35),random.randrange(groundLevel - 55),35,12,0.8])
-        
-    rectTrap = []
-    for i in range(2):
-        rectTrap.append([random.randrange(surfaceWidth - 35),random.randrange(groundLevel - 55),35,12,0.8])
-        
-    rectBreak = []
-    for i in range(2):
-        rectBreak.append([random.randrange(surfaceWidth - 35),random.randrange(groundLevel - 55),35,12,0.8])
 
 
     #Creating a method for rectangle collision detection and bouncing
@@ -77,25 +57,8 @@ def main():
             return -21
         else:
             return circleSpeedY
-        
-    def bounceTwiceAsHigh(circleCoords,rectCoords,cSize,circleSpeedY):
-        if rectCoords[0] < circleCoords[0] < (rectCoords[0] + rectCoords[2])\
-           and rectCoords[1] < (circleCoords[1] + cSize) < (rectCoords[1] + rectCoords[3] + 10) and circleSpeedY > 0:
-            return -42
-        else:
-            return circleSpeedY
      
-    def bounceOnce(circleCoords,rectCoords,cSize,circleSpeedY,noOfBounces):
-        if rectCoords[0] < circleCoords[0] < (rectCoords[0] + rectCoords[2])\
-           and rectCoords[1] < (circleCoords[1] + cSize) < (rectCoords[1] + rectCoords[3] + 10) and circleSpeedY > 0\
-           and noOfBounces == 0:
-            return -21
-            noOfBounces += 1
-        else:
-            return circleSpeedY
-
      
-
     #Main game loop
     while True:
         ev = pygame.event.poll()   
@@ -127,23 +90,13 @@ def main():
             mainSurface.fill("dodgerblue")
 
             #Drawing the circles and rectangles
-            pygame.draw.rect(mainSurface, (35, 30, 25), (0,groundLevel,surfaceWidth,surfaceHeight-groundLevel))
+            pygame.draw.rect(mainSurface, (35, 25, 25), (0,groundLevel,surfaceWidth,surfaceHeight-groundLevel))
             pygame.draw.circle(mainSurface, circleColor, circlePos, circleSize)
         
             for i in range(len(rectNormal)):
                 pygame.draw.rect(mainSurface, "navy", (rectNormal[i][:4]))
             for i in range(len(rectMove)):
-                pygame.draw.rect(mainSurface, "orangered", (rectMove[i][:4]))
-            for i in range(len(rectTramp)):
-                pygame.draw.rect(mainSurface, "green", (rectTramp[i][:4]))
-            for i in range(len(rectSpike)):
-                pygame.draw.rect(mainSurface, "black", (rectSpike[i][:4]))
-            for i in range(len(rectMoveSpike)):
-                pygame.draw.rect(mainSurface, "saddlebrown", (rectMoveSpike[i][:4]))
-            for i in range(len(rectTrap)):
-                pygame.draw.rect(mainSurface, "white", (rectTrap[i][:4]))
-            for i in range(len(rectBreak)):
-                pygame.draw.rect(mainSurface, "yellow", (rectBreak[i][:4]))
+                pygame.draw.rect(mainSurface, "darkred", (rectMove[i][:4]))
 
 
             #Moving the ball sideways with keys
@@ -177,28 +130,26 @@ def main():
             if ev.type == pygame.MOUSEBUTTONDOWN:
                 if jumping == False:
                     circleSpeedY = -21
+                    circleSpeedY2 = -21
                     jumping = True
 
 
-        #Making the rectangles work  
-            
-            #The normal, stationary rectangle
+            #Making the rectangles work  
             for i in range(len(rectNormal)):    
                 circleSpeedY = bounce(circlePos,rectNormal[i],circleSize,circleSpeedY)
 
                 if circleSpeedY < 0:
-                    rectNormal[i][1] += 2.5
+                    rectNormal[i][1] += 1
 
                 if (rectNormal[i][1] + rectNormal[i][3]) >= groundLevel:
                     rectNormal[i][0] = random.randrange(surfaceWidth - 35)
                     rectNormal[i][1] = random.randrange(groundLevel - 25)
             
-            #The sideways moving rectangle
             for i in range(len(rectMove)):
                 circleSpeedY = bounce(circlePos,rectMove[i],circleSize,circleSpeedY)
 
                 if circleSpeedY < 0:
-                    rectMove[i][1] += 2.5
+                    rectMove[i][1] += 1
 
                 rectMove[i][0] += rectMove[i][4]
                 if (rectMove[i][0] + rectMove[i][2]) >= surfaceWidth or rectMove[i][0] < 0:
@@ -207,78 +158,13 @@ def main():
                 if (rectMove[i][1] + rectMove[i][3]) >= groundLevel:
                     rectMove[i][0] = random.randrange(surfaceWidth - 35)
                     rectMove[i][1] = random.randrange(groundLevel - 25)
-             
-            #The trampoline-like rectangle
-            for i in range(len(rectTramp)):
-                circleSpeedY = bounceTwiceAsHigh(circlePos,rectTramp[i],circleSize,circleSpeedY)
-                
-                if circleSpeedY < 0:
-                    rectTramp[i][1] += 2.5
-                
-                if (rectTramp[i][1] + rectTramp[i][3]) >= groundLevel:
-                    rectTramp[i][0] = random.randrange(surfaceWidth - 35)
-                    rectTramp[i][1] = random.randrange(groundLevel - 25)
-            
-            #The rectangle which kills the circle
-            for i in range(len(rectSpike)):    
-                if rectSpike[i][0] < circlePos[0] < (rectSpike[i][0] + rectSpike[i][2])\
-                   and rectSpike[i][1] < (circlePos[1] + circleSize) < (rectSpike[i][1] + rectSpike[i][3] + 10)\
-                   and circleSpeedY > 0:
-                    circleFall = True
-                
-                if circleSpeedY < 0:
-                    rectSpike[i][1] += 2.5
-
-                if (rectSpike[i][1] + rectSpike[i][3]) >= groundLevel:
-                    rectSpike[i][0] = random.randrange(surfaceWidth - 35)
-                    rectSpike[i][1] = random.randrange(groundLevel - 25)
-             
-            #The rectangle which kills the circle but it's moving now
-            for i in range(len(rectMoveSpike)):    
-                if rectMoveSpike[i][0] < circlePos[0] < (rectMoveSpike[i][0] + rectMoveSpike[i][2])\
-                   and rectMoveSpike[i][1] < (circlePos[1] + circleSize) < (rectMoveSpike[i][1] + rectMoveSpike[i][3] + 10)\
-                   and circleSpeedY > 0:
-                    circleFall = True
-                
-                if circleSpeedY < 0:
-                    rectMoveSpike[i][1] += 2.5
-
-                rectMoveSpike[i][0] += rectMoveSpike[i][4]
-                if (rectMoveSpike[i][0] + rectMoveSpike[i][2]) >= surfaceWidth or rectMoveSpike[i][0] < 0:
-                    rectMoveSpike[i][4] = -rectMoveSpike[i][4]
-
-                if (rectMoveSpike[i][1] + rectMoveSpike[i][3]) >= groundLevel:
-                    rectMoveSpike[i][0] = random.randrange(surfaceWidth - 35)
-                    rectMoveSpike[i][1] = random.randrange(groundLevel - 25)
-             
-            #The rectangle which is actually a trap (doesn't let the ball bounce)
-            for i in range(len(rectTrap)):
-                if circleSpeedY < 0:
-                    rectTrap[i][1] += 2.5
-
-                if (rectTrap[i][1] + rectTrap[i][3]) >= groundLevel:
-                    rectTrap[i][0] = random.randrange(surfaceWidth - 35)
-                    rectTrap[i][1] = random.randrange(groundLevel - 25)
-             
-            #The rectangle which breaks once the ball bounces on it
-            for i in range(len(rectBreak)):    
-                circleSpeedY = bounceOnce(circlePos,rectBreak[i],circleSize,circleSpeedY,noOfBounces)
-
-                if circleSpeedY < 0:
-                    rectBreak[i][1] += 2.5
-
-                if (rectBreak[i][1] + rectBreak[i][3]) >= groundLevel:
-                    rectBreak[i][0] = random.randrange(surfaceWidth - 35)
-                    rectBreak[i][1] = random.randrange(groundLevel - 25)
             
             circlePos[1] += circleSpeedY
-
 
             if circlePos[0] > surfaceWidth:
                 circlePos[0] = 0
             elif circlePos[0] < 0:
                 circlePos[0] = surfaceWidth
- 
  
             #Bringing up the GAME OVER screen
             if circleFall:
@@ -301,11 +187,9 @@ def main():
                    and rectPRD[1] < pygame.mouse.get_pos()[1] < (rectPRD[1] + rectPRD[3]):
                     gameState = "game"
                     circleFall = False
-                    circlePos = [250,250]
-                    moveCircleLeft = False
-                    moveCircleRight = False
+                    circlePos[1] = 250
 
-
+       
 
         pygame.display.flip()
         

@@ -77,8 +77,7 @@ def main():
         if rectCoords[0] < circleCoords[0] < (rectCoords[0] + rectCoords[2])\
            and rectCoords[1] < (circleCoords[1] + cSize) < (rectCoords[1] + rectCoords[3] + 10)\
            and circleSpeedY > 0:
-            return -19
-            #score += 1
+            return -20
         else:
             return circleSpeedY
         
@@ -86,8 +85,7 @@ def main():
         if rectCoords[0] < circleCoords[0] < (rectCoords[0] + rectCoords[2])\
            and rectCoords[1] < (circleCoords[1] + cSize) < (rectCoords[1] + rectCoords[3] + 10)\
            and circleSpeedY > 0:
-            return -38
-            #score += 1
+            return -40
         else:
             return circleSpeedY
      
@@ -155,7 +153,20 @@ def main():
             renderedTextScore = font4.render(textScore, 1, pygame.Color("white"))
             mainSurface.blit(renderedTextScore, (225,groundLevel-7))'''
 
-
+            
+            if ev.type == pygame.KEYDOWN:
+                if ev.key == pygame.K_b:
+                    circleColor = "black"
+                elif ev.key == pygame.K_y:
+                    circleColor = "yellow"
+                elif ev.key == pygame.K_o:
+                    circleColor = "orange"
+                elif ev.key == pygame.K_g:
+                    circleColor = "green"
+                elif ev.key == pygame.K_r:
+                    circleColor = "red"
+            
+            
             #Moving the ball sideways with keys
             if ev.type == pygame.KEYDOWN:
                 if ev.key == pygame.K_RIGHT:
@@ -195,9 +206,15 @@ def main():
                 rectSpeed = -1*(circleSpeedY/5)
                 
             #The normal, stationary rectangle
-            for i in range(len(rectNormal)):    
+            for i in range(len(rectNormal)):
                 circleSpeedY = bounce(circlePos,rectNormal[i],circleSize,circleSpeedY)
-
+                
+                if rectNormal[i][0] < circlePos[0] < (rectNormal[i][0] + rectNormal[i][2])\
+                   and rectNormal[i][1] < (circlePos[1] + circleSize) < (rectNormal[i][1] + rectNormal[i][3] + 10)\
+                   and circleSpeedY > 0:
+                    print("Hit")
+                    score += 1
+                
                 if circleSpeedY < 0:
                     rectNormal[i][1] += rectSpeed
 
@@ -209,6 +226,12 @@ def main():
             for i in range(len(rectMove)):
                 circleSpeedY = bounce(circlePos,rectMove[i],circleSize,circleSpeedY)
 
+                if rectMove[i][0] < circlePos[0] < (rectMove[i][0] + rectMove[i][2])\
+                   and rectMove[i][1] < (circlePos[1] + circleSize) < (rectMove[i][1] + rectMove[i][3] + 10)\
+                   and circleSpeedY > 0:
+                    print("Hit")
+                    score += 1
+ 
                 if circleSpeedY < 0:
                     rectMove[i][1] += rectSpeed
 
@@ -223,6 +246,12 @@ def main():
             #The trampoline-like rectangle
             for i in range(len(rectTramp)):
                 circleSpeedY = bounceTwiceAsHigh(circlePos,rectTramp[i],circleSize,circleSpeedY)
+                
+                if rectTramp[i][0] < circlePos[0] < (rectTramp[i][0] + rectTramp[i][2])\
+                   and rectTramp[i][1] < (circlePos[1] + circleSize) < (rectTramp[i][1] + rectNormal[i][3] + 10)\
+                   and circleSpeedY > 0:
+                    print("Hit")
+                    score += 1
                 
                 if circleSpeedY < 0:
                     rectTramp[i][1] += rectSpeed
@@ -285,7 +314,6 @@ def main():
                     rectBreak[i][1] = random.randrange(350)'''
             
             circlePos[1] += circleSpeedY
-
 
             if circlePos[0] > surfaceWidth:
                 circlePos[0] = 0

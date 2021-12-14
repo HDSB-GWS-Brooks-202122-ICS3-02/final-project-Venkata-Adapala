@@ -36,11 +36,14 @@ def main():
     rectPRD = [125,575,200,55]
     rectSpeed = 2.5
     jumping = False
-    score = 0
     
     moveCircleRight = False 
     moveCircleLeft = False
-
+    #Score data
+    score = 0
+    initialPos = 0
+    finalPos = 0
+    scoreX = 185
 
     #Randomising rectangle placement
     rectNormal = []
@@ -77,7 +80,7 @@ def main():
         if rectCoords[0] < circleCoords[0] < (rectCoords[0] + rectCoords[2])\
            and rectCoords[1] < (circleCoords[1] + cSize) < (rectCoords[1] + rectCoords[3] + 10)\
            and circleSpeedY > 0:
-            return -20
+            return -18
         else:
             return circleSpeedY
         
@@ -85,7 +88,7 @@ def main():
         if rectCoords[0] < circleCoords[0] < (rectCoords[0] + rectCoords[2])\
            and rectCoords[1] < (circleCoords[1] + cSize) < (rectCoords[1] + rectCoords[3] + 10)\
            and circleSpeedY > 0:
-            return -40
+            return -36
         else:
             return circleSpeedY
      
@@ -149,10 +152,13 @@ def main():
             #for i in range(len(rectBreak)):
                 #pygame.draw.rect(mainSurface, "saddlebrown", (rectBreak[i][:4]))
 
-            '''textScore = str(score)
+            #Displaying score
+            textScore = str(score)
             renderedTextScore = font4.render(textScore, 1, pygame.Color("white"))
-            mainSurface.blit(renderedTextScore, (225,groundLevel-7))'''
-
+            mainSurface.blit(renderedTextScore, (scoreX,groundLevel-7))
+            if scoreX >= 10000:
+                scoreX = 165
+            
             
             if ev.type == pygame.KEYDOWN:
                 if ev.key == pygame.K_b:
@@ -213,7 +219,6 @@ def main():
                    and rectNormal[i][1] < (circlePos[1] + circleSize) < (rectNormal[i][1] + rectNormal[i][3] + 10)\
                    and circleSpeedY > 0:
                     print("Hit")
-                    score += 1
                 
                 if circleSpeedY < 0:
                     rectNormal[i][1] += rectSpeed
@@ -230,7 +235,6 @@ def main():
                    and rectMove[i][1] < (circlePos[1] + circleSize) < (rectMove[i][1] + rectMove[i][3] + 10)\
                    and circleSpeedY > 0:
                     print("Hit")
-                    score += 1
  
                 if circleSpeedY < 0:
                     rectMove[i][1] += rectSpeed
@@ -251,7 +255,6 @@ def main():
                    and rectTramp[i][1] < (circlePos[1] + circleSize) < (rectTramp[i][1] + rectNormal[i][3] + 10)\
                    and circleSpeedY > 0:
                     print("Hit")
-                    score += 1
                 
                 if circleSpeedY < 0:
                     rectTramp[i][1] += rectSpeed
@@ -323,11 +326,28 @@ def main():
             if circlePos[1] <= 27.5:
                 circlePos[1] = 27.5
 
+            #Creating the score mechanism
+            if circleSpeedY > 0:
+                finalPos = circlePos[1]
+            if circleSpeedY < 0:
+                initialPos = circlePos[1]
+                score += int((finalPos - initialPos)//10)
+
+            #Updating the high score using a file
+            file = open('High Score.txt', 'r')
+            highScore = file.readlines()
+            file.close()
+            if score > int(highScore[0]):
+                highScore = str(score)
+                file = open('High Score.txt', 'w')
+                file.write(highScore)
+                file.close()
+            
             #Bringing up the GAME OVER screen
             if circleFall:
                 gameState = "game_over"
-
-                  
+           
+            
          
          #GAME OVER screen
         if gameState == "game_over":
@@ -335,10 +355,21 @@ def main():
             pygame.draw.rect(mainSurface, "red", rectPRD)
             text3 = "GAME OVER"
             text4 = "Retry"
+            textDisplayScore = "Score: "
+            textHighScore = str(int(highScore[0]))
+            textDisplayHighScore = "HIGH SCORE: "
             renderedText3 = font3.render(text3, 1, pygame.Color("red"))
             renderedText4 = font2.render(text4, 1, pygame.Color("black"))
-            mainSurface.blit(renderedText3, (30,120))
-            mainSurface.blit(renderedText4, (180,575))
+            renderedTextScore = font4.render(textScore, 1, pygame.Color("white"))
+            renderedTextDisplayScore = font4.render(textDisplayScore, 1, pygame.Color("white"))
+            renderedTextHighScore = font4.render(textHighScore, 1, pygame.Color("yellow"))
+            renderedTextDisplayHighScore = font4.render(textDisplayHighScore, 1, pygame.Color("yellow"))
+            mainSurface.blit(renderedText3, (30,75))
+            mainSurface.blit(renderedText4, (180,575))           
+            mainSurface.blit(renderedTextScore, (235,275))
+            mainSurface.blit(renderedTextDisplayScore, (135,275))
+            mainSurface.blit(renderedTextHighScore, (290, 390))
+            mainSurface.blit(renderedTextDisplayHighScore, (70,390))
             if ev.type == pygame.MOUSEBUTTONUP:
                 if rectPRD[0] < pygame.mouse.get_pos()[0] < (rectPRD[0] + rectPRD[2])\
                    and rectPRD[1] < pygame.mouse.get_pos()[1] < (rectPRD[1] + rectPRD[3]):
@@ -347,6 +378,7 @@ def main():
                     circlePos = [225,250]
                     moveCircleLeft = False
                     moveCircleRight = False
+                    score = 0
 
 
 

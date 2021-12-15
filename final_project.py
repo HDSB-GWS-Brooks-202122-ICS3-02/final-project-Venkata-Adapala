@@ -70,9 +70,9 @@ def main():
     for i in range(1):
         rectTrap.append([random.randrange(surfaceWidth - 35),random.randrange(groundLevel - 55),35,12,0.8])
         
-    #rectBreak = []
-    #for i in range(2):
-        #rectBreak.append([random.randrange(surfaceWidth - 35),random.randrange(groundLevel - 55),35,12,0.8])
+    '''rectBreak = []
+    for i in range(2):
+        rectBreak.append([random.randrange(surfaceWidth - 35),random.randrange(groundLevel - 55),35,12,0.8])'''
 
 
     #Creating a method for rectangle collision detection and bouncing
@@ -80,7 +80,7 @@ def main():
         if rectCoords[0] < circleCoords[0] < (rectCoords[0] + rectCoords[2])\
            and rectCoords[1] < (circleCoords[1] + cSize) < (rectCoords[1] + rectCoords[3] + 10)\
            and circleSpeedY > 0:
-            return -18
+            return -21
         else:
             return circleSpeedY
         
@@ -88,7 +88,7 @@ def main():
         if rectCoords[0] < circleCoords[0] < (rectCoords[0] + rectCoords[2])\
            and rectCoords[1] < (circleCoords[1] + cSize) < (rectCoords[1] + rectCoords[3] + 10)\
            and circleSpeedY > 0:
-            return -36
+            return -42
         else:
             return circleSpeedY
      
@@ -97,7 +97,6 @@ def main():
            and rectCoords[1] < (circleCoords[1] + cSize) < (rectCoords[1] + rectCoords[3] + 10)\
            and circleSpeedY > 0:
             return -21
-            rectCoords[1] = 800
         else:
             return circleSpeedY'''
 
@@ -149,8 +148,8 @@ def main():
                 pygame.draw.rect(mainSurface, "darkred", (rectMoveSpike[i][:4]))
             for i in range(len(rectTrap)):
                 pygame.draw.rect(mainSurface, "white", (rectTrap[i][:4]))
-            #for i in range(len(rectBreak)):
-                #pygame.draw.rect(mainSurface, "saddlebrown", (rectBreak[i][:4]))
+            '''for i in range(len(rectBreak)):
+                pygame.draw.rect(mainSurface, "saddlebrown", (rectBreak[i][:4]))'''
 
             #Displaying score
             textScore = str(score)
@@ -308,7 +307,7 @@ def main():
             '''#The rectangle which breaks once the ball bounces on it
             for i in range(len(rectBreak)):
                 circleSpeedY = bounceAndVanish(circlePos,rectBreak[i],circleSize,circleSpeedY)
-
+                
                 if circleSpeedY < 0:
                     rectBreak[i][1] += rectSpeed
  
@@ -326,12 +325,13 @@ def main():
             if circlePos[1] <= 27.5:
                 circlePos[1] = 27.5
 
+
             #Creating the score mechanism
             if circleSpeedY > 0:
                 finalPos = circlePos[1]
             if circleSpeedY < 0:
                 initialPos = circlePos[1]
-                score += int((finalPos - initialPos)//10)
+                score += int((finalPos - initialPos)//15)
 
             #Updating the high score using a file
             file = open('High Score.txt', 'r')
@@ -342,6 +342,7 @@ def main():
                 file = open('High Score.txt', 'w')
                 file.write(highScore)
                 file.close()
+
             
             #Bringing up the GAME OVER screen
             if circleFall:
@@ -367,7 +368,7 @@ def main():
             mainSurface.blit(renderedText3, (30,75))
             mainSurface.blit(renderedText4, (180,575))           
             mainSurface.blit(renderedTextScore, (235,275))
-            mainSurface.blit(renderedTextDisplayScore, (135,275))
+            mainSurface.blit(renderedTextDisplayScore, (125,275))
             mainSurface.blit(renderedTextHighScore, (290, 390))
             mainSurface.blit(renderedTextDisplayHighScore, (70,390))
             if ev.type == pygame.MOUSEBUTTONUP:

@@ -30,14 +30,13 @@ def main():
     circleSize = 27.5
     circlePos = [225,250]
     circleColor = "red"
-    splCirclePos = [random.randrange(surfaceWidth - 35), random.randrange(groundLevel - 55)]
-    #splCircleColor = "magenta"
-    #splCircleSize = 15
     circleSpeedY = 0
     circleFall = False
     
     rectPRD = [125,575,200,55]
     rectSpeed = 2.5
+    splRectPos = [random.randrange(30, surfaceWidth - 35), random.randrange(groundLevel - 55), 20, 20]
+    splRectColor = "darkmagenta"
     jumping = False
     
     moveCircleRight = False 
@@ -48,6 +47,7 @@ def main():
     initialPos = 0
     finalPos = 0
     scoreX = 200
+
 
     #Randomising rectangle placement
     rectNormal = []
@@ -79,49 +79,30 @@ def main():
         rectBreak.append([random.randrange(surfaceWidth - 35),random.randrange(groundLevel - 55),35,12,0.8])
 
 
-    #Creating a method for rectangle collision detection and bouncing
-    def bounce(circleCoords,rectCoords,cSize,circleSpeedY):
+    #Creating a method for rectangle collision detection
+    def circleRectCol(circleCoords,rectCoords,cSize,circleSpeedY):
         if rectCoords[0] < circleCoords[0] < (rectCoords[0] + rectCoords[2])\
            and rectCoords[1] < (circleCoords[1] + cSize) < (rectCoords[1] + rectCoords[3] + 10)\
            and circleSpeedY > 0:
-            return -21
-        else:
-            return circleSpeedY
-        
-    def bounceTwiceAsHigh(circleCoords,rectCoords,cSize,circleSpeedY):
-        if rectCoords[0] < circleCoords[0] < (rectCoords[0] + rectCoords[2])\
-           and rectCoords[1] < (circleCoords[1] + cSize) < (rectCoords[1] + rectCoords[3] + 10)\
-           and circleSpeedY > 0:
-            return -42
-        else:
-            return circleSpeedY
-     
-    def bounceAndVanish(circleCoords,rectCoords,cSize,circleSpeedY):
-        if rectCoords[0] < circleCoords[0] < (rectCoords[0] + rectCoords[2])\
-           and rectCoords[1] < (circleCoords[1] + cSize) < (rectCoords[1] + rectCoords[3] + 10)\
-           and circleSpeedY > 0:
-            return (-21, True)
-        else:
-            return (circleSpeedY, False)
-        
+            return True
+    
+    #Method for moving the rectangles downwards
     def moveDownwards(rectCoords, circleSpeedY, rectSpeed):
         if circleSpeedY < 0:
-                    rectCoords[i][1] += rectSpeed
+            rectCoords[i][1] += rectSpeed
     
+    #Method for redrawing the rectangles at random locations after they go below the screen
     def rectRespawn(rectCoords,groundLevel):
         if (rectCoords[i][1] + rectCoords[i][3]) >= groundLevel:
             rectCoords[i][0] = random.randrange(surfaceWidth - 35)
             rectCoords[i][1] = random.randrange(350)
-
-    def flyHigh(circle1Coords,circle2Coords,cSize,circleSpeedY):
-        if circle2Coords[0] < circle1Coords[0] < (circle2Coords[0] + circle2Coords[2])\
-           and circle2Coords[1] < (circle1Coords[1] + cSize) < (circle2Coords[1] + circle2Coords[3] + 10)\
-           and circleSpeedY > 0:
-            return -42
-        else:
-            return circleSpeedY
-
      
+    #Method to move certain rectangles sideways
+    def moveSideways(rectCoords,surfaceWidth):
+        rectCoords[0] += rectCoords[4]
+        if (rectCoords[0] + rectCoords[2]) >= surfaceWidth or rectCoords[0] < 0:
+            rectCoords[4] = -rectCoords[4]
+    
 
     #Main game loop
     while True:
@@ -156,8 +137,8 @@ def main():
             #Drawing the circles and rectangles
             pygame.draw.rect(mainSurface, (35, 30, 25), (0,groundLevel,surfaceWidth,surfaceHeight-groundLevel))
             pygame.draw.circle(mainSurface, circleColor, circlePos, circleSize)
-            #pygame.draw.circle(mainSurface, splCircleColor, splCirclePos, splCircleSize)
-        
+            pygame.draw.rect(mainSurface, splRectColor, splRectPos)
+
             for i in range(len(rectNormal)):
                 pygame.draw.rect(mainSurface, "navy", (rectNormal[i][:4]))
             for i in range(len(rectMove)):
@@ -230,76 +211,86 @@ def main():
 
 
         #Making the rectangles work     
-            if circleSpeedY < 0:
-                rectSpeed = -1*(circleSpeedY/5)
+            if circleSpeedY <= 0:
+                rectSpeed = -1*(circleSpeedY/5)                
                 
             #The normal, stationary rectangle
-            for i in range(len(rectNormal)):
-                
-                circleSpeedY = bounce(circlePos,rectNormal[i],circleSize,circleSpeedY)
+            for i in range(len(rectNormal)):               
+                if circleRectCol(circlePos,rectNormal[i],circleSize,circleSpeedY):
+                    circleSpeedY = -21
+                    
                 moveDownwards(rectNormal, circleSpeedY, rectSpeed)
                 rectRespawn(rectNormal, groundLevel)
             
+            
             #The sideways moving rectangle
             for i in range(len(rectMove)):
-                
-                circleSpeedY = bounce(circlePos,rectMove[i],circleSize,circleSpeedY)
+                if circleRectCol(circlePos,rectMove[i],circleSize,circleSpeedY):
+                    circleSpeedY = -21
+
+                moveSideways(rectMove[i],surfaceWidth)
                 moveDownwards(rectMove, circleSpeedY, rectSpeed)
                 rectRespawn(rectMove, groundLevel)
-
-                rectMove[i][0] += rectMove[i][4]
-                if (rectMove[i][0] + rectMove[i][2]) >= surfaceWidth or rectMove[i][0] < 0:
-                    rectMove[i][4] = -rectMove[i][4]
+             
              
             #The trampoline-like rectangle
             for i in range(len(rectTramp)):
-
-                circleSpeedY = bounceTwiceAsHigh(circlePos,rectTramp[i],circleSize,circleSpeedY)
+                if circleRectCol(circlePos,rectTramp[i],circleSize,circleSpeedY):
+                    circleSpeedY = -42
+                    
                 moveDownwards(rectTramp, circleSpeedY, rectSpeed)                
                 rectRespawn(rectTramp, groundLevel)
             
+            
             #The rectangle which kills the circle
             for i in range(len(rectSpike)):
-                if rectSpike[i][0] < circlePos[0] < (rectSpike[i][0] + rectSpike[i][2])\
-                   and rectSpike[i][1] < (circlePos[1] + circleSize) < (rectSpike[i][1] + rectSpike[i][3] + 10)\
-                   and circleSpeedY > 0:
+                if circleRectCol(circlePos,rectSpike[i],circleSize,circleSpeedY):
                     circleFall = True
 
                 moveDownwards(rectSpike, circleSpeedY, rectSpeed)
                 rectRespawn(rectSpike, groundLevel)
              
+             
             #The rectangle which kills the circle but it's moving now
             for i in range(len(rectMoveSpike)):
-                if rectMoveSpike[i][0] < circlePos[0] < (rectMoveSpike[i][0] + rectMoveSpike[i][2])\
-                   and rectMoveSpike[i][1] < (circlePos[1] + circleSize) < (rectMoveSpike[i][1] + rectMoveSpike[i][3] + 10)\
-                   and circleSpeedY > 0:
+                if circleRectCol(circlePos,rectMoveSpike[i],circleSize,circleSpeedY):
                     circleFall = True
 
-                rectMoveSpike[i][0] += rectMoveSpike[i][4]
-                if (rectMoveSpike[i][0] + rectMoveSpike[i][2]) >= surfaceWidth or rectMoveSpike[i][0] < 0:
-                    rectMoveSpike[i][4] = -rectMoveSpike[i][4]
-                
+                moveSideways(rectMoveSpike[i],surfaceWidth)
                 moveDownwards(rectMoveSpike, circleSpeedY, rectSpeed)
                 rectRespawn(rectMoveSpike, groundLevel)
              
+             
             #The rectangle which is actually a trap (doesn't let the ball bounce)
             for i in range(len(rectTrap)):
-
                 moveDownwards(rectTrap, circleSpeedY, rectSpeed)
                 rectRespawn(rectTrap, groundLevel)
              
+             
             #The rectangle which breaks once the ball bounces on it
             for i in range(len(rectBreak)):
-                circleSpeedY, breakBlock = bounceAndVanish(circlePos,rectBreak[i],circleSize,circleSpeedY)
-
-                if breakBlock:
+                if circleRectCol(circlePos,rectBreak[i],circleSize,circleSpeedY):
+                    circleSpeedY = -21
                     rectBreak.pop(i)
                     break
-                
+
                 moveDownwards(rectBreak, circleSpeedY, rectSpeed)
                 rectRespawn(rectBreak, groundLevel)
-            
+
+             
+            #The special rectangle
+            if circleRectCol(circlePos,splRectPos,circleSize,circleSpeedY):
+                circleSpeedY = 0               
+
+            if circleSpeedY < 0:
+                splRectPos[1] += rectSpeed
+
+            if (splRectPos[1] + splRectPos[3]) >= groundLevel:
+                splRectPos[0] = random.randrange(surfaceWidth - 35)
+                splRectPos[1] = random.randrange(350)
+                
             circlePos[1] += circleSpeedY
+
 
             if circlePos[0] > surfaceWidth:
                 circlePos[0] = 0
@@ -354,10 +345,10 @@ def main():
             renderedTextDisplayHighScore = font4.render(textDisplayHighScore, 1, pygame.Color("yellow"))
             mainSurface.blit(renderedText3, (30,75))
             mainSurface.blit(renderedText4, (180,575))           
-            mainSurface.blit(renderedTextScore, (235,275))
-            mainSurface.blit(renderedTextDisplayScore, (125,275))
-            mainSurface.blit(renderedTextHighScore, (290, 390))
-            mainSurface.blit(renderedTextDisplayHighScore, (70,390))
+            mainSurface.blit(renderedTextScore, (235,285))
+            mainSurface.blit(renderedTextDisplayScore, (125,285))
+            mainSurface.blit(renderedTextHighScore, (290, 400))
+            mainSurface.blit(renderedTextDisplayHighScore, (70,400))
             if ev.type == pygame.MOUSEBUTTONUP:
                 if rectPRD[0] < pygame.mouse.get_pos()[0] < (rectPRD[0] + rectPRD[2])\
                    and rectPRD[1] < pygame.mouse.get_pos()[1] < (rectPRD[1] + rectPRD[3]):
@@ -367,6 +358,7 @@ def main():
                     moveCircleLeft = False
                     moveCircleRight = False
                     score = 0
+
 
 
         #Displaying the screen

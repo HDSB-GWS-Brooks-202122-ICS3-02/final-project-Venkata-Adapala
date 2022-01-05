@@ -5,104 +5,135 @@ def main():
 
     pygame.init()
 
-    i = 0
-
-    #Screen dimensions
+    #Screen dimensions & stuff
     surfaceWidth = 450
     surfaceHeight = 785
+    groundLevel = surfaceHeight - 30
+    mainSurface = pygame.display.set_mode((surfaceWidth,surfaceHeight))             #Creating the screen
     
-    gameState = "start"
-
-    #fps
-    clock = pygame.time.Clock()
-
-    mainSurface = pygame.display.set_mode((surfaceWidth,surfaceHeight))
-
+    gameState = "start"             #Setting the game state
+    clock = pygame.time.Clock()             #Controlling the FPS
+    
     #Font data
     font = pygame.font.SysFont("Candara", 75)
     font2 = pygame.font.SysFont("Tahoma", 40)
     font3 = pygame.font.SysFont("Impact", 90)
     font4 = pygame.font.SysFont("Verdana", 30)
+    font5 = pygame.font.SysFont("Times New Roman", 50)
 
-    groundLevel = surfaceHeight - 25
+    startBG = pygame.image.load("wallpapers/white_wallp2.jpg")
+    gameBG = pygame.image.load("wallpapers/white-brick-wall-planning-iphone-11.jpg")
 
-    #Circle and Rectangle data
-    circleSize = 27.5
-    circlePos = [225,250]
-    circleColor = "red"
-    circleSpeedY = 0
-    circleFall = False
+    #Sprite data
+    spriteImgMain = pygame.image.load("sprites/spriteMain.png")             #Loading the main sprite
+    spriteImgMainX = pygame.transform.scale(spriteImgMain, (36, 36))                #Scaling it up to the desirable size
     
-    rectPRD = [125,575,200,55]
-    rectSpeed = 2.5
-    splRectPos = [random.randrange(30, surfaceWidth - 35), random.randrange(groundLevel - 55), 20, 20]
-    splRectColor = "darkmagenta"
+##    #Lizard
+##    spriteLizard = pygame.image.load("lizard_f_idle_anim_f0.png")
+##    spriteLizard2x = pygame.transform.scale2x(spriteLizard)
+##    spriteLizardPos = [200,225]
+##
+##    #Elf
+##    spriteElf = pygame.image.load("elf_m_idle_anim_f0.png")
+##    spriteElf2x = pygame.transform.scale2x(spriteElf)
+##    spriteElfPos = [200,325]
+##
+##    #Knight
+##    spriteKnight = pygame.image.load("knight_f_idle_anim_f0.png")
+##    spriteKnight2x = pygame.transform.scale2x(spriteKnight)
+##    spriteKnightPos = [200,425]
+
+    spriteMainPos = [225,250]
+    spriteSpeedY = 0
+    spriteFall = False
+
+    #Pad data
+    padStart = pygame.image.load("sprites/pad_start.png")
+    padNormal = pygame.image.load("sprites/pad_normal.png")
+    padMove = pygame.image.load("sprites/pad_move.png")
+    padTramp = pygame.image.load("sprites/pad_tramp.png")
+    padSpike = pygame.image.load("sprites/pad_spike.png")
+    padTrap = pygame.image.load("sprites/pad_trap.png")
+    padMoveSpike = pygame.image.load("sprites/pad_movespike.png")
+    padBreak = pygame.image.load("sprites/pad_break.png")
+    
+    padSpeed = 0
     jumping = False
-    
-    moveCircleRight = False 
-    moveCircleLeft = False
+
+    rectPRD = [125,575,200,55]
+    rectCD = [125,500,200,55]
+    moveSpriteRight = False
+    moveSpriteLeft = False
     
     #Score data
     score = 0
     initialPos = 0
     finalPos = 0
-    scoreX = 200
 
 
-    #Randomising rectangle placement
-    rectNormal = []
-    for i in range(2):
-        rectNormal.append([random.randrange(surfaceWidth - 35),random.randrange(groundLevel - 55),35,12])
+    #Randomising pad placement
 
-    rectMove = []
+    padStartPos = []
+    padNormalPos = []
+    padMovePos = []
+    padTrampPos = []
+    padSpikePos = []
+    padMoveSpikePos = []
+    padTrapPos = []
+    padBreakPos = []
+    
+    for i in range(3):
+        padNormalPos.append([random.randrange(surfaceWidth - 35), random.randrange(-800, 0)])
+        padMovePos.append([random.randrange(surfaceWidth - 35), random.randrange(-800, 0), 0.8])
+        padSpikePos.append([random.randrange(surfaceWidth - 45), random.randrange(-800, 0)])
+            
     for i in range(2):
-        rectMove.append([random.randrange(surfaceWidth - 35),random.randrange(groundLevel - 55),35,12,0.8])
-        
-    rectTramp = []
-    for i in range(2):
-        rectTramp.append([random.randrange(surfaceWidth - 35),random.randrange(groundLevel - 55),35,12])
-        
-    rectSpike = []
-    for i in range(2):
-        rectSpike.append([random.randrange(surfaceWidth - 35),random.randrange(groundLevel - 55),35,12])
-        
-    rectMoveSpike = []
-    for i in range(2):
-        rectMoveSpike.append([random.randrange(surfaceWidth - 35),random.randrange(groundLevel - 55),35,12,0.8])
-        
-    rectTrap = []
-    for i in range(1):
-        rectTrap.append([random.randrange(surfaceWidth - 35),random.randrange(groundLevel - 55),35,12,0.8])
-        
-    rectBreak = []
-    for i in range(2):
-        rectBreak.append([random.randrange(surfaceWidth - 35),random.randrange(groundLevel - 55),35,12,0.8])
+        padTrampPos.append([random.randrange(surfaceWidth - 45), random.randrange(-800, 0)])
+        padTrapPos.append([random.randrange(surfaceWidth - 45), random.randrange(-800, 0)])
+        padMoveSpikePos.append([random.randrange(surfaceWidth - 45), random.randrange(-800, 0), 0.8])
+        padBreakPos.append([random.randrange(surfaceWidth - 45), random.randrange(-800, 0)])
 
+    for i in range(10, 400, 55):
+        padStartPos.append([i, 600])
+    
 
-    #Creating a method for rectangle collision detection
-    def circleRectCol(circleCoords,rectCoords,cSize,circleSpeedY):
-        if rectCoords[0] < circleCoords[0] < (rectCoords[0] + rectCoords[2])\
-           and rectCoords[1] < (circleCoords[1] + cSize) < (rectCoords[1] + rectCoords[3] + 10)\
-           and circleSpeedY > 0:
+#Methods
+    #Method for sprite-pad collision detection
+    def spritePadCol(spriteCoords, padCoords, spriteSpeedY):
+        if ((padCoords[0] - 25) < spriteCoords[0] < (padCoords[0] + 25))\
+           and ((padCoords[1]  - 15) < (spriteCoords[1] + 25) < (padCoords[1] + 10)) and spriteSpeedY > 0:
+            return True
+
+    #Method for sprite-mouse collision detection
+    def spriteMouseCol(spriteCoords, mouseCoords):
+        if ((spriteCoords[0] - 5) < mouseCoords[0] < (spriteCoords[0] + 35))\
+           and ((spriteCoords[1] + 5)) < mouseCoords[1] < (spriteCoords[1] + 60):
+            return True
+
+    #Method for mouse-rect collision detection
+    def mouseRectCol(rectCoords, mouseCoords):
+        if rectCoords[0] < mouseCoords[0] < (rectCoords[0] + rectCoords[2])\
+           and rectCoords[1] < mouseCoords[1] < (rectCoords[1] + rectCoords[3]):
             return True
     
-    #Method for moving the rectangles downwards
-    def moveDownwards(rectCoords, circleSpeedY, rectSpeed):
-        if circleSpeedY < 0:
-            rectCoords[i][1] += rectSpeed
+    #Method for moving the pads downwards
+    def moveDownwards(padCoords, spriteSpeedY, padSpeed):
+        if spriteSpeedY < 0:
+            padCoords[1] += padSpeed
     
-    #Method for redrawing the rectangles at random locations after they go below the screen
-    def rectRespawn(rectCoords,groundLevel):
-        if (rectCoords[i][1] + rectCoords[i][3]) >= groundLevel:
-            rectCoords[i][0] = random.randrange(surfaceWidth - 35)
-            rectCoords[i][1] = random.randrange(350)
-     
-    #Method to move certain rectangles sideways
-    def moveSideways(rectCoords,surfaceWidth):
-        rectCoords[0] += rectCoords[4]
-        if (rectCoords[0] + rectCoords[2]) >= surfaceWidth or rectCoords[0] < 0:
-            rectCoords[4] = -rectCoords[4]
-    
+    #Method for redrawing the pads at random locations after they go below the screen
+    def padRespawn(padCoords, groundLevel):
+        if padCoords[1]>= (groundLevel - 10):
+            padCoords[0] = random.randrange(surfaceWidth - 35)
+            padCoords[1] = -15
+
+    #Method for moving the pads sideways
+    def moveSideways(padCoords, surfaceWidth):
+        padCoords[0] += padCoords[2]
+        if padCoords[0] >= (surfaceWidth - 27) or padCoords[0] <= 3:
+            padCoords[2] = -padCoords[2]
+
+
 
     #Main game loop
     while True:
@@ -114,198 +145,230 @@ def main():
        
         #Start screen
         if gameState == "start":
-            mainSurface.fill("navy")
-            pygame.draw.rect(mainSurface, "white", rectPRD)
+            mainSurface.blit(startBG, [0,0])
+            pygame.draw.rect(mainSurface, "black", rectPRD)
+##            pygame.draw.rect(mainSurface, "orchid", rectCD)
             text1 = "Whirlybird"
             text2 = "Play"
-            renderedText1 = font.render(text1, 1, pygame.Color("white"))
-            renderedText2 = font2.render(text2, 1, pygame.Color("navy"))
+##            textC = "Customize"
+            renderedText1 = font.render(text1, 1, pygame.Color("black"))
+            renderedText2 = font2.render(text2, 1, pygame.Color("snow"))
+##            renderedTextC = font2.render(textC, 1, pygame.Color("black"))
             mainSurface.blit(renderedText1, (70,115))
             mainSurface.blit(renderedText2, (190,575))
+##            mainSurface.blit(renderedTextC, (135, 500))
             if ev.type == pygame.MOUSEBUTTONUP:
-                if rectPRD[0] < pygame.mouse.get_pos()[0] < (rectPRD[0] + rectPRD[2])\
-                   and rectPRD[1] < pygame.mouse.get_pos()[1] < (rectPRD[1] + rectPRD[3]):
+##                if mouseRectCol(rectCD, pygame.mouse.get_pos()):
+##                    gameState = "customize"
+                if mouseRectCol(rectPRD, pygame.mouse.get_pos()):
                     gameState = "game"
 
+
+##        #Customization screen
+##        if gameState == "customize":
+##            mainSurface.fill("purple")
+##            pygame.draw.rect(mainSurface, "snow", rectPRD)
+##            
+##            textChoose = "Choose your Avatar"
+##            renderedTextChoose = font5.render(textChoose, 1, pygame.Color("black"))
+##            mainSurface.blit(renderedTextChoose, (30,115))
+##            mainSurface.blit(renderedText2, (190,575))
+##            
+##            mainSurface.blit(spriteLizard2x, spriteLizardPos)
+##            mainSurface.blit(spriteElf2x, spriteElfPos)
+##            mainSurface.blit(spriteKnight2x, spriteKnightPos)
+##            if ev.type == pygame.MOUSEBUTTONUP:
+##                if spriteMouseCol(spriteLizardPos, pygame.mouse.get_pos()):
+##                    spriteMain = spriteLizard2x
+##                    print("You have selected - Lizard")
+##                elif spriteMouseCol(spriteElfPos, pygame.mouse.get_pos()):
+##                    spriteMain = spriteElf2x
+##                    print("You have selected - Elf")
+##                elif spriteMouseCol(spriteKnightPos, pygame.mouse.get_pos()):
+##                    spriteMain = spriteKnight2x
+##                    print("You have selected - Knight")
+##
+##                if mouseRectCol(rectPRD, pygame.mouse.get_pos()):
+##                    gameState = "game"
+                    
 
 
         #Game screen
         if gameState == "game":
             
-            mainSurface.fill("dodgerblue")
+            mainSurface.blit(gameBG, [0,0])
+            
+            #Drawing the sprites
+            spriteMain = spriteImgMainX
+            mainSurface.blit(spriteMain, spriteMainPos)
+            pygame.draw.rect(mainSurface, (35, 30, 25), (0, groundLevel, surfaceWidth, surfaceHeight-groundLevel))
 
-            #Drawing the circles and rectangles
-            pygame.draw.rect(mainSurface, (35, 30, 25), (0,groundLevel,surfaceWidth,surfaceHeight-groundLevel))
-            pygame.draw.circle(mainSurface, circleColor, circlePos, circleSize)
-            pygame.draw.rect(mainSurface, splRectColor, splRectPos)
+        #Displaying the 'pads'
+            #The starting pad
+            for i in range(len(padStartPos)):
+                padStartX = pygame.transform.scale(padStart, (50, 50))
+                mainSurface.blit(padStartX, padStartPos[i])
+            
+            #The normal pads
+            for i in range(len(padNormalPos)):
+                padNormal2x = pygame.transform.scale2x(padNormal)
+                mainSurface.blit(padNormal2x, padNormalPos[i])
 
-            for i in range(len(rectNormal)):
-                pygame.draw.rect(mainSurface, "navy", (rectNormal[i][:4]))
-            for i in range(len(rectMove)):
-                pygame.draw.rect(mainSurface, "yellow", (rectMove[i][:4]))
-            for i in range(len(rectTramp)):
-                pygame.draw.rect(mainSurface, "green", (rectTramp[i][:4]))
-            for i in range(len(rectSpike)):
-                pygame.draw.rect(mainSurface, "black", (rectSpike[i][:4]))
-            for i in range(len(rectMoveSpike)):
-                pygame.draw.rect(mainSurface, "darkred", (rectMoveSpike[i][:4]))
-            for i in range(len(rectTrap)):
-                pygame.draw.rect(mainSurface, "white", (rectTrap[i][:4]))
-            for i in range(len(rectBreak)):
-                pygame.draw.rect(mainSurface, "darkgreen", (rectBreak[i][:4]))
+            #The sideways moving pads
+            for i in range(len(padMovePos)):
+                padMove2x = pygame.transform.scale2x(padMove)
+                mainSurface.blit(padMove2x, padMovePos[i][:2])
+
+            #The trampoline-like pads
+            for i in range(len(padTrampPos)):
+                padTramp2x = pygame.transform.scale2x(padTramp)
+                mainSurface.blit(padTramp2x, padTrampPos[i])
+
+            #The pads that kill the sprite
+            for i in range(len(padSpikePos)):
+                padSpike2x = pygame.transform.scale2x(padSpike)
+                mainSurface.blit(padSpike2x, padSpikePos[i])
+
+            #The pad which is actually a trap (doesn't let the sprite bounce)
+            for i in range(len(padTrapPos)):
+                padTrap2x = pygame.transform.scale2x(padTrap)
+                mainSurface.blit(padTrap2x, padTrapPos[i])
+
+            #The pad which kills the sprite but it's moving now
+            for i in range(len(padMoveSpikePos)):
+                padMoveSpike2x = pygame.transform.scale2x(padMoveSpike)
+                mainSurface.blit(padMoveSpike2x, padMoveSpikePos[i][:2])
+
+            #The pads that break upon the sprite landing
+            for i in range(len(padBreakPos)):
+                padBreak2x = pygame.transform.scale2x(padBreak)
+                mainSurface.blit(padBreak2x, padBreakPos[i])
+
 
             #Displaying score
             textScore = str(score)
             renderedTextScore = font4.render(textScore, 1, pygame.Color("white"))
-            mainSurface.blit(renderedTextScore, (scoreX,groundLevel-7))
-            if score >= 10000:
-                scoreX = 185
-            
+            mainSurface.blit(renderedTextScore, (190, groundLevel-7))
 
-           #Changing the ball's colors 
-            if ev.type == pygame.KEYDOWN:
-                if ev.key == pygame.K_b:
-                    circleColor = "black"
-                elif ev.key == pygame.K_y:
-                    circleColor = "yellow"
-                elif ev.key == pygame.K_o:
-                    circleColor = "orange"
-                elif ev.key == pygame.K_g:
-                    circleColor = "green"
-                elif ev.key == pygame.K_r:
-                    circleColor = "red"
+
             
-            
-            #Moving the ball sideways with keys
+            #Moving the sprite sideways with keys
             if ev.type == pygame.KEYDOWN:
                 if ev.key == pygame.K_RIGHT:
-                    moveCircleRight = True
+                    moveSpriteRight = True
                 elif ev.key == pygame.K_LEFT:
-                    moveCircleLeft = True
-
+                    moveSpriteLeft = True
             elif ev.type == pygame.KEYUP:
                 if ev.key == pygame.K_RIGHT:
-                    moveCircleRight = False
+                    moveSpriteRight = False
                 elif ev.key == pygame.K_LEFT:
-                    moveCircleLeft = False            
+                    moveSpriteLeft = False            
              
-            if ((circlePos[1] + circleSize) < groundLevel) and moveCircleRight:
-                circlePos[0] += 4
-            elif ((circlePos[1] + circleSize) < groundLevel) and moveCircleLeft:
-                circlePos[0] -= 4
+            if (spriteMainPos[1] < groundLevel) and moveSpriteRight:
+                spriteMainPos[0] += 4
+            elif (spriteMainPos[1] < groundLevel) and moveSpriteLeft:
+                spriteMainPos[0] -= 4
           
 
-            #Making the circle jump and bounce
-            if ((circlePos[1] + circleSize) > groundLevel):
-                circlePos[1] = groundLevel - circleSize
-                circleFall = True
-                circleSpeedY = 0
+            #Making the sprite jump and bounce
+            if spriteMainPos[1] > groundLevel:
+                spriteMainPos[1] = groundLevel
+                spriteSpeedY = 0
                 jumping = False
+                spriteFall = True
             else:
-                circleSpeedY += 0.3      
-        
+                spriteSpeedY += 0.3
+
             if ev.type == pygame.MOUSEBUTTONDOWN:
                 if jumping == False:
-                    circleSpeedY = -21
+                    spriteSpeedY = -23
                     jumping = True
+                    spriteSpeedY += 0.3
 
 
-        #Making the rectangles work     
-            if circleSpeedY <= 0:
-                rectSpeed = -1*(circleSpeedY/5)                
+        #Making the pads work        
+            if spriteSpeedY <= 0 and spriteMainPos[1] > 30:
+                padSpeed = - spriteSpeedY / 4
+            elif spriteMainPos[1] <= 30:
+                padSpeed = - spriteSpeedY / 2
                 
-            #The normal, stationary rectangle
-            for i in range(len(rectNormal)):               
-                if circleRectCol(circlePos,rectNormal[i],circleSize,circleSpeedY):
-                    circleSpeedY = -21
-                    
-                moveDownwards(rectNormal, circleSpeedY, rectSpeed)
-                rectRespawn(rectNormal, groundLevel)
-            
-            
-            #The sideways moving rectangle
-            for i in range(len(rectMove)):
-                if circleRectCol(circlePos,rectMove[i],circleSize,circleSpeedY):
-                    circleSpeedY = -21
+            #The starting pad
+            for i in range(len(padStartPos)):
+                moveDownwards(padStartPos[i], spriteSpeedY, padSpeed)
+                if spritePadCol(spriteMainPos, padStartPos[i], spriteSpeedY):
+                    spriteSpeedY = -46
 
-                moveSideways(rectMove[i],surfaceWidth)
-                moveDownwards(rectMove, circleSpeedY, rectSpeed)
-                rectRespawn(rectMove, groundLevel)
-             
-             
-            #The trampoline-like rectangle
-            for i in range(len(rectTramp)):
-                if circleRectCol(circlePos,rectTramp[i],circleSize,circleSpeedY):
-                    circleSpeedY = -42
-                    
-                moveDownwards(rectTramp, circleSpeedY, rectSpeed)                
-                rectRespawn(rectTramp, groundLevel)
+            #The normal, stationary pads
+            for i in range(len(padNormalPos)):
+                moveDownwards(padNormalPos[i], spriteSpeedY, padSpeed)
+                padRespawn(padNormalPos[i], groundLevel)
+                if spritePadCol(spriteMainPos, padNormalPos[i], spriteSpeedY):
+                    spriteSpeedY = -23
             
+            #The sideways moving pads
+            for i in range(len(padMovePos)):
+                moveSideways(padMovePos[i],surfaceWidth)
+                moveDownwards(padMovePos[i], spriteSpeedY, padSpeed)
+                padRespawn(padMovePos[i], groundLevel)
+                if spritePadCol(spriteMainPos, padMovePos[i], spriteSpeedY):
+                    spriteSpeedY = -23
+             
+            #The trampoline-like pads
+            for i in range(len(padTrampPos)):
+                moveDownwards(padTrampPos[i], spriteSpeedY, padSpeed)                
+                padRespawn(padTrampPos[i], groundLevel)
+                if spritePadCol(spriteMainPos, padTrampPos[i], spriteSpeedY):
+                    spriteSpeedY = -46
             
-            #The rectangle which kills the circle
-            for i in range(len(rectSpike)):
-                if circleRectCol(circlePos,rectSpike[i],circleSize,circleSpeedY):
-                    circleFall = True
+            #The pads which kill the sprite
+            for i in range(len(padSpikePos)):
+                moveDownwards(padSpikePos[i], spriteSpeedY, padSpeed)
+                padRespawn(padSpikePos[i], groundLevel)
+                if spritePadCol(spriteMainPos, padSpikePos[i], spriteSpeedY):
+                    spriteFall = True
 
-                moveDownwards(rectSpike, circleSpeedY, rectSpeed)
-                rectRespawn(rectSpike, groundLevel)
+            #The pads which kill the sprite but they're moving now
+            for i in range(len(padMoveSpikePos)):
+                moveSideways(padMoveSpikePos[i],surfaceWidth)
+                moveDownwards(padMoveSpikePos[i], spriteSpeedY, padSpeed)
+                padRespawn(padMoveSpikePos[i], groundLevel)
+                if spritePadCol(spriteMainPos, padMoveSpikePos[i], spriteSpeedY):
+                    spriteFall = True
              
-             
-            #The rectangle which kills the circle but it's moving now
-            for i in range(len(rectMoveSpike)):
-                if circleRectCol(circlePos,rectMoveSpike[i],circleSize,circleSpeedY):
-                    circleFall = True
-
-                moveSideways(rectMoveSpike[i],surfaceWidth)
-                moveDownwards(rectMoveSpike, circleSpeedY, rectSpeed)
-                rectRespawn(rectMoveSpike, groundLevel)
-             
-             
-            #The rectangle which is actually a trap (doesn't let the ball bounce)
-            for i in range(len(rectTrap)):
-                moveDownwards(rectTrap, circleSpeedY, rectSpeed)
-                rectRespawn(rectTrap, groundLevel)
-             
-             
-            #The rectangle which breaks once the ball bounces on it
-            for i in range(len(rectBreak)):
-                if circleRectCol(circlePos,rectBreak[i],circleSize,circleSpeedY):
-                    circleSpeedY = -21
-                    rectBreak.pop(i)
+            #The pads which are actually traps (doesn't let the ball bounce)
+            for i in range(len(padTrapPos)):
+                moveDownwards(padTrapPos[i], spriteSpeedY, padSpeed)
+                padRespawn(padTrapPos[i], groundLevel)
+                if spritePadCol(spriteMainPos, padTrapPos[i], spriteSpeedY):
+                    padTrapPos[i] = [random.randrange(surfaceWidth - 45), -15]
                     break
-
-                moveDownwards(rectBreak, circleSpeedY, rectSpeed)
-                rectRespawn(rectBreak, groundLevel)
-
              
-            #The special rectangle
-            if circleRectCol(circlePos,splRectPos,circleSize,circleSpeedY):
-                circleSpeedY = 0               
-
-            if circleSpeedY < 0:
-                splRectPos[1] += rectSpeed
-
-            if (splRectPos[1] + splRectPos[3]) >= groundLevel:
-                splRectPos[0] = random.randrange(surfaceWidth - 35)
-                splRectPos[1] = random.randrange(350)
+            #The pads which break once the sprite bounces on it
+            for i in range(len(padBreakPos)):
+                moveDownwards(padBreakPos[i], spriteSpeedY, padSpeed)
+                padRespawn(padBreakPos[i], groundLevel)
+                if spritePadCol(spriteMainPos, padBreakPos[i], spriteSpeedY):
+                    spriteSpeedY = -23
+                    padBreakPos[i] = [random.randrange(surfaceWidth - 45), -15]
+                    break
                 
-            circlePos[1] += circleSpeedY
+            spriteMainPos[1] += spriteSpeedY
 
 
-            if circlePos[0] > surfaceWidth:
-                circlePos[0] = 0
-            elif circlePos[0] < 0:
-                circlePos[0] = surfaceWidth
+            if spriteMainPos[0] > surfaceWidth:
+                spriteMainPos[0] = 0
+            elif spriteMainPos[0] < 0:
+                spriteMainPos[0] = surfaceWidth
 
-            if circlePos[1] <= 27.5:
-                circlePos[1] = 27.5
+            if spriteMainPos[1] <= 30:
+                spriteMainPos[1] = 30
 
 
             #Creating the score mechanism
-            if circleSpeedY > 0:
-                finalPos = circlePos[1]
-            elif circleSpeedY < 0:
-                initialPos = circlePos[1]
+            if spriteSpeedY > 0:
+                finalPos = spriteMainPos[1]
+            elif spriteSpeedY < 0:
+                initialPos = spriteMainPos[1]
                 score += int((finalPos - initialPos)//15)
             
             if score < 0:
@@ -323,7 +386,7 @@ def main():
             
             
             #Bringing up the GAME OVER screen
-            if circleFall:
+            if spriteFall:
                 gameState = "game_over"
            
             
@@ -347,16 +410,15 @@ def main():
             mainSurface.blit(renderedText4, (180,575))           
             mainSurface.blit(renderedTextScore, (235,285))
             mainSurface.blit(renderedTextDisplayScore, (125,285))
-            mainSurface.blit(renderedTextHighScore, (290, 400))
-            mainSurface.blit(renderedTextDisplayHighScore, (70,400))
+            mainSurface.blit(renderedTextHighScore, (285, 400))
+            mainSurface.blit(renderedTextDisplayHighScore, (65,400))
             if ev.type == pygame.MOUSEBUTTONUP:
-                if rectPRD[0] < pygame.mouse.get_pos()[0] < (rectPRD[0] + rectPRD[2])\
-                   and rectPRD[1] < pygame.mouse.get_pos()[1] < (rectPRD[1] + rectPRD[3]):
+                if mouseRectCol(rectPRD, pygame.mouse.get_pos()):
                     gameState = "game"
-                    circleFall = False
-                    circlePos = [225,250]
-                    moveCircleLeft = False
-                    moveCircleRight = False
+                    spriteFall = False
+                    spriteMainPos = [225,250]
+                    moveSpriteLeft = False
+                    moveSpriteRight = False
                     score = 0
 
 
@@ -364,7 +426,7 @@ def main():
         #Displaying the screen
         pygame.display.flip()
 
-        #Setting the fps to 60
+        #Setting the FPS to 60
         clock.tick(60)
 
     pygame.quit()

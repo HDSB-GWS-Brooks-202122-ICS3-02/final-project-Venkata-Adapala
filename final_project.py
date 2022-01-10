@@ -1,32 +1,98 @@
 import pygame
-import random   
+import random
+import ctypes
+
+ctypes.windll.user32.SetProcessDPIAware()                                     #Displaying the pixels correctly
+
+
+#Defining important variables
+
+#Screen dimensions
+surfaceWidth = 550
+surfaceHeight = 980
+groundLevel = surfaceHeight - 55
+
+rectPRD = [160,725,230,75]
+# rectCD = [125,500,200,55]
+    
+#Pad positions
+padStartPos = []
+padNormalPos = []
+padMovePos = []
+padTrampPos = []
+padSpikePos = []
+padMoveSpikePos = []
+padTrapPos = []
+padBreakPos = []
+
+#A method to constantly randomize pad placement
+def padPlacement():
+    
+    global padNormalPos
+    global padMovePos
+    global padTrampPos
+    global padTrapPos
+    global padSpikePos
+    global padMoveSpikePos
+    global padBreakPos
+    global padStartPos
+        
+    padStartPos = []
+    padNormalPos = []
+    padMovePos = []
+    padTrampPos = []
+    padSpikePos = []
+    padMoveSpikePos = []
+    padTrapPos = []
+    padBreakPos = []
+
+    #Only 3 such pads should be displayed at a time
+    for i in range(3):
+        padNormalPos.append([random.randrange(surfaceWidth - 55), random.randrange(-980, 0)])
+        padMovePos.append([random.randrange(surfaceWidth - 55), random.randrange(-980, 0), 0.8])
+              
+    #Only 2 such pads should be displayed at a time
+    for i in range(2):
+        padTrampPos.append([random.randrange(surfaceWidth - 55), random.randrange(-980, 0)])
+        padTrapPos.append([random.randrange(surfaceWidth - 55), random.randrange(-980, 0)])
+        padSpikePos.append([random.randrange(surfaceWidth - 55), random.randrange(-980, 0)])
+        padMoveSpikePos.append([random.randrange(surfaceWidth - 55), random.randrange(-980, 0), 0.8])
+        padBreakPos.append([random.randrange(surfaceWidth - 55), random.randrange(-980, 0)])
+
+    #A series of these sprites must be displayed
+    for i in range(10, 560, 55):
+        padStartPos.append([i, 600])
+
+
 
 def main():
 
     pygame.init()
  
-    #Screen dimensions & stuff
-    surfaceWidth = 560
-    surfaceHeight = 980
-    groundLevel = surfaceHeight - 55
-    mainSurface = pygame.display.set_mode((surfaceWidth,surfaceHeight))             #Creating the screen
+    mainSurface = pygame.display.set_mode((surfaceWidth,surfaceHeight))       #Creating the screen
     
-    gameState = "start"             #Setting the game state
-    clock = pygame.time.Clock()             #Controlling the FPS
+    gameState = "start"                                                       #Setting the game state
+    clock = pygame.time.Clock()                                               #Controlling the FPS
     
     #Font data
-    font = pygame.font.SysFont("Candara", 94)
+    font = pygame.font.SysFont("Candara", 100)
     font2 = pygame.font.SysFont("Tahoma", 50)
     font3 = pygame.font.SysFont("Impact", 113)
     font4 = pygame.font.SysFont("Verdana", 38)
     #font5 = pygame.font.SysFont("Times New Roman", 63)
 
+    #Loading the backgrounds of the start and game screens
     startBG = pygame.image.load("wallpapers/white_wallp2.jpg")
-    gameBG = pygame.image.load("wallpapers/white-brick-wall-planning-iphone-11.jpg")
+    gameBG = pygame.image.load("wallpapers/white_brick_wp.jpg")
 
-    #Sprite data
-    spriteImgMain = pygame.image.load("sprites/spriteMain.png")             #Loading the main sprite
-    spriteImgMainX = pygame.transform.scale(spriteImgMain, (48, 48))                #Scaling it up to the desirable size
+    #Main sprite data
+    spriteImgMain = pygame.image.load("sprites/spriteMain.png")               #Loading the main sprite
+    spriteImgMainX = pygame.transform.scale(spriteImgMain, (48, 48))          #Scaling it up to the desirable size
+    spriteMainPos = [250,250]
+    spriteSpeedY = 0
+    moveSpriteRight = False
+    moveSpriteLeft = False
+    spriteFall = False                                                        #The game's over when this is True
     
 #     #Lizard
 #     spriteLizard = pygame.image.load("lizard_f_idle_anim_f0.png")
@@ -43,13 +109,7 @@ def main():
 #     spriteKnight2x = pygame.transform.scale2x(spriteKnight)
 #     spriteKnightPos = [200,425]
 
-    spriteMainPos = [225,250]
-    spriteSpeedY = 0
-    moveSpriteRight = False
-    moveSpriteLeft = False
-    spriteFall = False
-
-    #Pad data
+    #Loading the pad sprites
     padStart = pygame.image.load("sprites/pad_start.png")
     padNormal = pygame.image.load("sprites/pad_normal.png")
     padMove = pygame.image.load("sprites/pad_move.png")
@@ -60,42 +120,12 @@ def main():
     padBreak = pygame.image.load("sprites/pad_break.png")    
     padSpeed = 0
     
-    jumping = False
-    rectPRD = [165,725,230,75]
-#     rectCD = [125,500,200,55]
+    padPlacement()                                                            #Randomizing pad placement
     
     #Score data
     score = 0
     initialPos = 0
     finalPos = 0
-    
-
-    #Randomising pad placement
-    padStartPos = []
-    padNormalPos = []
-    padMovePos = []
-    padTrampPos = []
-    padSpikePos = []
-    padMoveSpikePos = []
-    padTrapPos = []
-    padBreakPos = []
-    
-    #Only 3 such pads should be displayed at a time
-    for i in range(3):
-        padNormalPos.append([random.randrange(surfaceWidth - 55), random.randrange(-980, 0)])
-        padMovePos.append([random.randrange(surfaceWidth - 55), random.randrange(-980, 0), 0.8])
-        padSpikePos.append([random.randrange(surfaceWidth - 55), random.randrange(-980, 0)])
-          
-    #Only 2 such pads should be displayed at a time
-    for i in range(2):
-        padTrampPos.append([random.randrange(surfaceWidth - 55), random.randrange(-980, 0)])
-        padTrapPos.append([random.randrange(surfaceWidth - 55), random.randrange(-980, 0)])
-        padMoveSpikePos.append([random.randrange(surfaceWidth - 55), random.randrange(-980, 0), 0.8])
-        padBreakPos.append([random.randrange(surfaceWidth - 55), random.randrange(-980, 0)])
-
-    #A series of these sprites must be displayed
-    for i in range(10, 560, 55):
-        padStartPos.append([i, 600])
     
 
 #Methods
@@ -131,7 +161,7 @@ def main():
     #Method for moving the pads sideways
     def moveSideways(padCoords, surfaceWidth):
         padCoords[0] += padCoords[2]
-        if padCoords[0] >= (surfaceWidth - 27) or padCoords[0] <= 3:
+        if padCoords[0] >= (surfaceWidth - 60) or padCoords[0] <= 3:
             padCoords[2] = -padCoords[2]
 
 
@@ -146,8 +176,8 @@ def main():
        
         #Start screen
         if gameState == "start":
-            mainSurface.blit(startBG, [0,0])
-            pygame.draw.rect(mainSurface, "black", rectPRD)
+            mainSurface.blit(startBG, [0,0])                                          #Loading the background
+            pygame.draw.rect(mainSurface, "black", rectPRD)                           #Drawing the rect button
 #             pygame.draw.rect(mainSurface, "orchid", rectCD)
             text1 = "Whirlybird"
             text2 = "Play"
@@ -155,13 +185,13 @@ def main():
             renderedText1 = font.render(text1, True, pygame.Color("black"))
             renderedText2 = font2.render(text2, True, pygame.Color("snow"))
 #             renderedTextC = font2.render(textC, 1, pygame.Color("black"))
-            mainSurface.blit(renderedText1, (85,115))
-            mainSurface.blit(renderedText2, (237,725))
+            mainSurface.blit(renderedText1, (70,125))
+            mainSurface.blit(renderedText2, (232,725))                                #Displaying the texts
 #             mainSurface.blit(renderedTextC, (135, 500))
             if ev.type == pygame.MOUSEBUTTONUP:
 #                 if mouseRectCol(rectCD, pygame.mouse.get_pos()):
 #                     gameState = "customize"
-                if mouseRectCol(rectPRD, pygame.mouse.get_pos()):
+                if mouseRectCol(rectPRD, pygame.mouse.get_pos()):                     #Col-detection for the button
                     gameState = "game"
 
 
@@ -201,7 +231,7 @@ def main():
             
             #Drawing the sprites
             spriteMain = spriteImgMainX
-            mainSurface.blit(spriteMain, spriteMainPos)
+            mainSurface.blit(spriteMain, spriteMainPos)                               #Displaying the main sprite
             pygame.draw.rect(mainSurface, (35, 30, 25), (0, groundLevel, surfaceWidth, surfaceHeight-groundLevel))
 
         #Displaying the 'pads'
@@ -247,8 +277,11 @@ def main():
 
             #Displaying score
             textScore = str(score)
+            textDisplayScore = "Score: "
             renderedTextScore = font4.render(textScore, True, pygame.Color("white"))
-            mainSurface.blit(renderedTextScore, (225, groundLevel-7))
+            renderedTextDisplayScore = font4.render(textDisplayScore, True, pygame.Color("white"))
+            mainSurface.blit(renderedTextScore, (285, groundLevel))
+            mainSurface.blit(renderedTextDisplayScore, (145, groundLevel))
 
             
             #Moving the sprite sideways with keys
@@ -264,45 +297,40 @@ def main():
                     moveSpriteLeft = False            
              
             if moveSpriteRight:
-                spriteMainPos[0] += 5
+                spriteMainPos[0] += 4.5
             elif moveSpriteLeft:
-                spriteMainPos[0] -= 5
+                spriteMainPos[0] -= 4.5
           
 
             #Making the sprite jump and bounce
-            if spriteMainPos[1] > groundLevel:
+            if spriteMainPos[1] >= groundLevel:
                 spriteMainPos[1] = groundLevel
                 spriteSpeedY = 0
-                jumping = False
                 spriteFall = True
             else:
-                spriteSpeedY += 0.4
-
-            if ev.type == pygame.MOUSEBUTTONDOWN:
-                if jumping == False:
-                    jumping = True
-                    spriteSpeedY = -26
-                    spriteSpeedY += 0.4
+                spriteSpeedY += 0.45
                     
                     
             #Making the sprite appear on the other side of the screen once it goes off of it
-            if spriteMainPos[0] > (surfaceWidth - 20):
-                spriteMainPos[0] = 0
-            elif spriteMainPos[0] < 0:
-                spriteMainPos[0] = (surfaceWidth - 20)
+            if spriteMainPos[0] > (surfaceWidth - 30):
+                spriteMainPos[0] = -20
+            elif spriteMainPos[0] < -20:
+                spriteMainPos[0] = (surfaceWidth - 30)
             
             #Stopping the sprite from going above a certain height
-            if spriteMainPos[1] <= 30:
-                spriteMainPos[1] = 30
+            if spriteMainPos[1] <= 100:
+                spriteMainPos[1] = 100
 
 
         #Making the pads work        
-            if spriteSpeedY <= 0 and spriteMainPos[1] > 30:
+            
+            #Manipulating the speed by which the pads move downwards
+            if spriteSpeedY <= 0 and spriteMainPos[1] > 100:
                 padSpeed = - (spriteSpeedY / 4)
-            elif spriteMainPos[1] <= 30:
+            elif spriteMainPos[1] <= 100:
                 padSpeed = - (spriteSpeedY / 2)
                 
-            #The starting pad
+            #The starting series of pads
             for i in range(len(padStartPos)):
                 moveDownwards(padStartPos[i], spriteSpeedY, padSpeed)
                 if spritePadCol(spriteMainPos, padStartPos[i], spriteSpeedY):
@@ -365,13 +393,13 @@ def main():
             spriteMainPos[1] += spriteSpeedY
 
 
-            #Creating the score mechanism
+            #Creating the score mechanism by calculating & adding the dist. covered by the sprite everytime it bounces
             if spriteSpeedY > 0:
                 finalPos = spriteMainPos[1]
             elif spriteSpeedY < 0:
                 initialPos = spriteMainPos[1]
                 score += int((finalPos - initialPos)//15)
-            
+                
             #Ensuring that the score doesn't become negative
             if score < 0:
                 score = 0
@@ -408,17 +436,18 @@ def main():
             renderedTextDisplayScore = font4.render(textDisplayScore, True, pygame.Color("white"))
             renderedTextHighScore = font4.render(textHighScore, True, pygame.Color("yellow"))
             renderedTextDisplayHighScore = font4.render(textDisplayHighScore, True, pygame.Color("yellow"))
-            mainSurface.blit(renderedText3, (35,75))
-            mainSurface.blit(renderedText4, (222,725))           
-            mainSurface.blit(renderedTextScore, (300,350))
+            mainSurface.blit(renderedText3, (30,75))
+            mainSurface.blit(renderedText4, (220,725))           
+            mainSurface.blit(renderedTextScore, (295,350))
             mainSurface.blit(renderedTextDisplayScore, (150,350))
-            mainSurface.blit(renderedTextHighScore, (355, 500))
+            mainSurface.blit(renderedTextHighScore, (345, 500))
             mainSurface.blit(renderedTextDisplayHighScore, (65,500))
             if ev.type == pygame.MOUSEBUTTONUP:
                 if mouseRectCol(rectPRD, pygame.mouse.get_pos()):
+                    padPlacement()
                     gameState = "game"
                     spriteFall = False
-                    spriteMainPos = [225,250]
+                    spriteMainPos = [250,250]
                     moveSpriteLeft = False
                     moveSpriteRight = False
                     score = 0

@@ -13,7 +13,7 @@ surfaceHeight = 980
 groundLevel = surfaceHeight - 55
 
 rectPRD = [160,725,230,75]
-# rectCD = [125,500,200,55]
+rectHD = [160,625,230,75]
     
 #Pad positions
 padStartPos = []
@@ -79,12 +79,14 @@ def main():
     font2 = pygame.font.SysFont("Tahoma", 50)
     font3 = pygame.font.SysFont("Impact", 113)
     font4 = pygame.font.SysFont("Verdana", 38)
-    #font5 = pygame.font.SysFont("Times New Roman", 63)
+    font5 = pygame.font.SysFont("Times New Roman", 63)
 
-    #Loading the backgrounds of the start and game screens
+    #Loading various backgrounds
     startBG = pygame.image.load("wallpapers/white_wallp2.jpg")
     gameBG = pygame.image.load("wallpapers/white_brick_wp.jpg")
-
+    helpBG1 = pygame.image.load("wallpapers/helpBG1.jpg")
+    helpBG2 = pygame.image.load("wallpapers/helpBG2.jpg")
+    
     #Main sprite data
     spriteImgMain = pygame.image.load("sprites/spriteMain.png")               #Loading the main sprite
     spriteImgMainX = pygame.transform.scale(spriteImgMain, (48, 48))          #Scaling it up to the desirable size
@@ -178,50 +180,34 @@ def main():
         if gameState == "start":
             mainSurface.blit(startBG, [0,0])                                          #Loading the background
             pygame.draw.rect(mainSurface, "black", rectPRD)                           #Drawing the rect button
-#             pygame.draw.rect(mainSurface, "orchid", rectCD)
+            pygame.draw.rect(mainSurface, "navy", rectHD)
             text1 = "Whirlybird"
             text2 = "Play"
-#             textC = "Customize"
+            textH = "Help"
             renderedText1 = font.render(text1, True, pygame.Color("black"))
             renderedText2 = font2.render(text2, True, pygame.Color("snow"))
-#             renderedTextC = font2.render(textC, 1, pygame.Color("black"))
+            renderedTextH = font2.render(textH, 1, pygame.Color("snow"))
             mainSurface.blit(renderedText1, (70,125))
             mainSurface.blit(renderedText2, (232,725))                                #Displaying the texts
-#             mainSurface.blit(renderedTextC, (135, 500))
+            mainSurface.blit(renderedTextH, (225,625))
             if ev.type == pygame.MOUSEBUTTONUP:
-#                 if mouseRectCol(rectCD, pygame.mouse.get_pos()):
-#                     gameState = "customize"
+                if mouseRectCol(rectHD, pygame.mouse.get_pos()):
+                    gameState = "help1"
                 if mouseRectCol(rectPRD, pygame.mouse.get_pos()):                     #Col-detection for the button
                     gameState = "game"
 
 
 
-#         #Customization screen
-#         if gameState == "customize":
-#             mainSurface.fill("purple")
-#             pygame.draw.rect(mainSurface, "snow", rectPRD)
-#             
-#             textChoose = "Choose your Avatar"
-#             renderedTextChoose = font5.render(textChoose, 1, pygame.Color("black"))
-#             mainSurface.blit(renderedTextChoose, (30,115))
-#             mainSurface.blit(renderedText2, (190,575))
-#             
-#             mainSurface.blit(spriteLizard2x, spriteLizardPos)
-#             mainSurface.blit(spriteElf2x, spriteElfPos)
-#             mainSurface.blit(spriteKnight2x, spriteKnightPos)
-#             if ev.type == pygame.MOUSEBUTTONUP:
-#                 if spriteMouseCol(spriteLizardPos, pygame.mouse.get_pos()):
-#                     spriteMain = spriteLizard2x
-#                     print("You have selected - Lizard")
-#                 elif spriteMouseCol(spriteElfPos, pygame.mouse.get_pos()):
-#                     spriteMain = spriteElf2x
-#                     print("You have selected - Elf")
-#                 elif spriteMouseCol(spriteKnightPos, pygame.mouse.get_pos()):
-#                     spriteMain = spriteKnight2x
-#                     print("You have selected - Knight")
-# 
-#                 if mouseRectCol(rectPRD, pygame.mouse.get_pos()):
-#                     gameState = "game"
+        #Help screen
+        if gameState == "help1":
+            mainSurface.blit(helpBG1, [0,0])
+            pygame.draw.rect(mainSurface, "black", rectPRD)
+            textN = "Next"
+            renderedTextN = font2.render(textN, True, pygame.Color("snow"))
+            mainSurface.blit(renderedTextN, (225,727))
+            if ev.type == pygame.MOUSEBUTTONUP:
+                if mouseRectCol(rectPRD, pygame.mouse.get_pos()):
+                    gameState = "help2"
                     
 
 

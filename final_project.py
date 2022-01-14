@@ -62,7 +62,7 @@ def padPlacement():
 
     #A series of these sprites must be displayed
     for i in range(10, 560, 55):
-        padStartPos.append([i, 600])
+        padStartPos.append([i, 625])
 
 
 
@@ -160,7 +160,7 @@ def main():
     
     #Method for redrawing the pads at random locations after they go below the screen
     def padRespawn(padCoords, gLevel):
-        if padCoords[1]>= (gLevel - 10):
+        if padCoords[1] >= (gLevel - 10):
             padCoords[0] = random.randrange(surfaceWidth - 55)
             padCoords[1] = -15
 
@@ -182,7 +182,7 @@ def main():
        
         #Start screen
         if gameState == "start":
-            mainSurface.blit(startBG, [0,0])                                          #Loading the background
+            mainSurface.blit(startBG, [0,0])                                          #Displaying the background
             pygame.draw.rect(mainSurface, "black", rectNBRP1D)                        #Drawing the rect buttons
             pygame.draw.rect(mainSurface, "navy", rectHelpD)
             text1 = "Whirlybird"
@@ -419,7 +419,7 @@ def main():
            
             
          
-         #GAME OVER screen
+        #GAME OVER screen
         elif gameState == "game_over":
             mainSurface.fill("black")
             pygame.draw.rect(mainSurface, "red", rectNBRP1D)
@@ -448,16 +448,16 @@ def main():
                 if mouseRectCol(rectNBRP1D, pygame.mouse.get_pos()):            
                     padPlacement()
                     gameState = "game"
-                    spriteFall = False
                     spriteMainPos = [250,250]
+                    spriteFall = False
                     moveSpriteLeft = False
                     moveSpriteRight = False
                     score = 0                                              #Resetting the game once "Retry" is clicked    
                 elif mouseRectCol(rectPH2D, pygame.mouse.get_pos()):
                     gameState = "help1"
                     padPlacement()
-                    spriteFall = False
                     spriteMainPos = [250,250]
+                    spriteFall = False
                     moveSpriteLeft = False
                     moveSpriteRight = False
                     score = 0                                              #Resetting the game once "Help" is clicked

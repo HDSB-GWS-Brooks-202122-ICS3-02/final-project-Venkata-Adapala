@@ -3,7 +3,7 @@ import random
 import ctypes
 
 ctypes.windll.user32.SetProcessDPIAware()                                     #Displaying the pixels correctly
-
+#Grade: Level 4+  Excellent Job!
 
 #Defining important variables
 
